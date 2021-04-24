@@ -56,10 +56,14 @@ decrease memory current position
 ,
 ```
 read char and put it to memory current position
+
+this operation is equal to getchar() in C.
 ```
 .
 ```
 write char from memory current position
+
+this operation is equal to putchar() in C.
 ```
 [
 ```
@@ -74,7 +78,7 @@ go to the start bracket
 ```
 n
 ```
-\print '\n'
+print '\n'
 
 syntax of subtasks calling:
 ```
@@ -94,8 +98,11 @@ will read input char, write it and write '\n'
 will write all chars form 1 to 255
 
 ```
->,[>,]<[.<]
+>,[>,]<[.<]n|
 ```
 
 will read string until char(0) and print it reversed. 
 
+## notes
+
+if you use getchar with console input then it will read '\n' as well.
