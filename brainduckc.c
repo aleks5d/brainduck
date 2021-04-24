@@ -265,6 +265,19 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 		} 
+		if (buf[j] == '/') {
+			if (buf[j + 1] == '/') {
+				while (j < st.st_size && buf[j] != '\n') ++j;
+				i = j;
+				continue;
+			}
+			if (buf[j + 1] == '*') {
+				j += 2;
+				while (j < st.st_size - 1 && (buf[j] != '*' || buf[j + 1] != '/')) ++j;
+				i = j;
+				continue;
+			}
+		}
 		if(operation(buf + i, j - i + (buf[j] != '|'), od)) {
 			fprintf(stderr, "Error: Error while writing\n");
 			close(fd);
