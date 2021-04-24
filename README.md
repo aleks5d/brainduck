@@ -109,7 +109,7 @@ if you use getchar with console input then it will read '\n' as well.
 
 ## ToDo
 
-- [] more examples
-- [] smth like registers 
-- [] functions 
-- [] functions with parametres in Name, like: addX=add(X-1)|+
+- [ ] more examples
+- [ ] smth like registers 
+- [ ] functions 
+- [ ] functions with parametres in Name, like: addX=add(X-1)|+
