@@ -18,7 +18,10 @@ char Cpreamb[] =
 "unsigned char* mem;\n"
 "int pos = 0;\n"
 "int memSize = 30000;\n"
-"\n"
+"\n";
+
+/* C main */
+char Cmain[] = 
 "int main(int argc, char *argv[]) {\n"
 "	mem = malloc(memSize);\n"
 "	if (mem == NULL) {\n"
@@ -29,6 +32,17 @@ char Cpreamb[] =
 /* C post*/
 char Cpost[] = 
 "	free(mem);\n"
+"}\n";
+
+/* C pre */
+char CFuncPre[] = 
+"void ";
+/* C pre post */
+char CFuncPrePost[] = 
+"() {\n";
+
+/* C post */
+char CFuncPost[] = 
 "}\n";
 
 char Compile[] = 
@@ -139,6 +153,31 @@ int addOp2(char* name, char* op) {
 	return addOp(name, strlen(name), op, strlen(op));
 }
 
+int addFunction(char* name, int len) {
+	if (sizeOp == capacityOp) {
+		capacityOp += capacityOp + 2;
+		char **newMem = realloc(operations, capacityOp * sizeof(*operations));
+		if (newMem == NULL) {
+			fprintf(stderr, "Error: cannot realloc operations memory\n");
+			return 1;
+		}
+		operations = newMem;
+	}
+	operations[sizeOp] = malloc(len + 1);
+	memcpy(operations[sizeOp], name, len);
+	operations[sizeOp][len] = '\0';
+	++sizeOp;
+	operations[sizeOp] = malloc(len + 5);
+	memcpy(operations[sizeOp], name, len);
+	operations[sizeOp][len++] = '(';
+	operations[sizeOp][len++] = ')';
+	operations[sizeOp][len++] = ';';
+	operations[sizeOp][len++] = '\n';
+	operations[sizeOp][len++] = '\0';
+	++sizeOp;
+	return 0;
+}
+
 int addDefaultOps() {
 	if(addOp2("<", "--pos;\n")) return 1;
 	if(addOp2(">", "++pos;\n")) return 1;
@@ -167,6 +206,20 @@ int operation(char *name, int len, int fd) {
 		if (!fl) {
 			return tryWrite(fd, operations[i + 1], strlen(operations[i + 1]));
 		}
+	}
+	return 0;
+}
+
+int existsFunction(char *name, int len) {
+	for (int i = 0; i < sizeOp; i += 2) {
+		char fl = 0;
+		for (int j = 0; j < len; ++j) {
+			if (operations[i][j] != name[j]) {
+				fl = 1;
+				break;
+			}
+		}
+		if (!fl) return 1;
 	}
 	return 0;
 }
@@ -232,6 +285,7 @@ int main(int argc, char *argv[]) {
 	int x;
 	int cnt = 0;
 	int cycles = 0;
+	char opend = 0;
 	for (int i = 0; i < st.st_size; ++i) {
 		int j = i;
 		while (j < st.st_size && isFunLetter(buf[j])) ++j;
@@ -250,6 +304,98 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 		char RE = 0;
+		if (buf[j] == ':') {
+			if (i == j) {
+				fprintf(stderr, "Error: empty function name\n");
+				close(fd);
+				close(od);
+				for (int i = 0; i < sizeOp; ++i) free(operations[i]);
+				free(operations);
+				remove(outName);
+				exit(1);
+			}
+			if (existsFunction(buf + i, j - i)) {
+				fprintf(stderr, "Error: Compilation error, function ");
+				while (i < j) {
+					fprintf(stderr, "%c", buf[i]);
+					++j;
+				}
+				fprintf(stderr, "created twice\n");
+				close(fd);
+				close(od);
+				for(int i = 0; i < sizeOp; ++i) free(operations[i]);
+				free(operations);
+				remove(outName);
+				exit(1);
+			}
+			if (opend) {
+				char *top;
+				if (opend == 1) top = CFuncPost;
+				if (opend == 2) top = Cpost;
+				if (tryWrite(od, top, strlen(top))) {
+					fprintf(stderr, "Error: Error while writing\n");
+					close(fd);
+					close(od);
+					remove(outName);
+					free(outName);
+					for (int i = 0; i < sizeOp; ++i) free(operations[i]);
+					free(operations);
+					exit(1);
+				}
+			}
+			if (j-i==4 && buf[i]=='m' && buf[i+1]=='a' && buf[i+2]=='i' && buf[i+3]=='n') {
+				opend = 2;
+			} else {
+				opend = 1;
+			}
+			char *top;
+			if (opend == 1) top = CFuncPre;
+			if (opend == 2) top = Cmain;
+			if (tryWrite(od, top, strlen(top))) {
+				fprintf(stderr, "Error: Error while writing\n");
+				close(fd);
+				close(od);
+				remove(outName);
+				free(outName);
+				for (int i = 0; i < sizeOp; ++i) free(operations[i]);
+				free(operations);
+				exit(1);
+			}
+			if (opend == 1) {
+				if (tryWrite(od, buf+i, j-i)) {
+					fprintf(stderr, "Error: Error while writing\n");
+					close(fd);
+					close(od);
+					remove(outName);
+					free(outName);
+					for (int i = 0; i < sizeOp; ++i) free(operations[i]);
+					free(operations);
+					exit(1);
+				}
+				if (tryWrite(od, CFuncPrePost, strlen(CFuncPrePost))) {
+					fprintf(stderr, "Error: Error while writing\n");
+					close(fd);
+					close(od);
+					remove(outName);
+					free(outName);
+					for (int i = 0; i < sizeOp; ++i) free(operations[i]);
+					free(operations);
+					exit(1);
+				}
+			}
+			if (addFunction(buf + i, j - i)) {
+				fprintf(stderr, "Error: cannot add function\n");
+				close(fd);
+				close(od);
+				remove(outName);
+				free(outName);
+				for (int i = 0; i < sizeOp; ++i) free(operations[i]);
+				free(operations);
+				exit(1);
+			}
+			i = j;
+			continue;
+		}
 		if (buf[j] != '|') {
 			if (i != j) {
 				fprintf(stderr, "Error: Bad operation: ");
@@ -290,15 +436,21 @@ int main(int argc, char *argv[]) {
 		}
 		i = j;
 	}
-	if (tryWrite(od, Cpost, strlen(Cpost))) {
-		fprintf(stderr, "Error: Error while writing\n");
-		close(fd);
-		close(od);
-		remove(outName);
-		free(outName);
-		for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-		free(operations);
-		exit(1);
+
+	if (opend) {
+		char *top;
+		if (opend == 1) top = CFuncPost;
+		if (opend == 2) top = Cpost;
+		if (tryWrite(od, top, strlen(top))) {
+			fprintf(stderr, "Error: Error while writing\n");
+			close(fd);
+			close(od);
+			remove(outName);
+			free(outName);
+			for (int i = 0; i < sizeOp; ++i) free(operations[i]);
+			free(operations);
+			exit(1);
+		}
 	}
 
 	close(od);
