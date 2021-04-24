@@ -94,10 +94,8 @@ will read input char, write it and write '\n'
 will write all chars form 1 to 255
 
 ```
->,+[>,+]<[-.<]
+>,[>,]<[.<]
 ```
 
-will read string and print it reversed. 
-
-You can crash it by char(255)
+will read string until char(0) and print it reversed. 
 
