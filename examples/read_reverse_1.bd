@@ -1,17 +1,17 @@
 //this script will read string until '\n', reverse it and write
 // ' - curr position
 main:
->>++++++++++< //0 0 \n' 0 ...
-,>[->+<<->]< // read char x. 0 (x-\n)' 0 \n
-[> // if x != \n then read again. 0 (x-\n) 0' \n
-,>[->+<<->]< // read char x. ... (x-\n)' 0 \n
-] // if x == '\n' then break
->>[-<<+>>]<< // move '\n' to the end of string
-< // pos = last stirng char
+>>++++++++++< 		//0 0 \n' 0 ...
+,>[->+<<->]< 		// read char x. 0 (x-\n)' 0 \n
+[> 			// if x != \n then read again. 0 (x-\n) 0' \n
+,>[->+<<->]< 		// read char x. ... (x-\n)' 0 \n
+] 			// if x == '\n' then break
+>>[-<<+>>]<< 		// move '\n' to the end of string
+< 			// pos = last stirng char
 [
->[-<+>>+<] // ... x 0' \n
-<.[-] // ... 0' 0 \n
->>[-<<+>>] // ... \n 0 0'
-<<< // move to the last char of string
+>[-<+>>+<] 		// ... x 0' \n
+<.[-] 			// ... 0' 0 \n
+>>[-<<+>>] 		// ... \n 0 0'
+<<< 			// move to the last char of string
 ]
 n|
