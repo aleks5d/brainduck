@@ -477,7 +477,7 @@ int main(int argc, char *argv[]) {
 	if (res) {
 		fprintf(stderr, "Error: Compile error\n");
 	} else {
-		fprintf(stderr, "Ok: Copile successfully\n");
+		fprintf(stderr, "Ok: Compile successfully\n");
 	}
 	remove(outName);
 	free(outName);
