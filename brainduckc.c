@@ -125,7 +125,7 @@ int tryWrite(int fd, char *buf, int size) {
 	return 0;
 }
 
-char **operations;
+char **operations = NULL;
 int capacityOp = 0;
 int sizeOp = 0;
 
@@ -194,7 +194,24 @@ int addDefaultOps() {
 	return 0;
 }
 
+int existsFunction(char *name, int len) {
+	for (int i = 0; i < sizeOp; i += 2) {
+		char fl = 0;
+		for (int j = 0; j < len; ++j) {
+			if (operations[i][j] != name[j]) {
+				fl = 1;
+				break;
+			}
+		}
+		if (!fl) return 1;
+	}
+	return 0;
+}
+
 int operation(char *name, int len, int fd) {
+	if (!existsFunction(name, len)) {
+		return 2;
+	}
 	for (int i = 0; i < sizeOp; i += 2) {
 		char fl = 0;
 		for (int j = 0; j < len; ++j) {
@@ -213,18 +230,16 @@ int operation(char *name, int len, int fd) {
 	return 0;
 }
 
-int existsFunction(char *name, int len) {
-	for (int i = 0; i < sizeOp; i += 2) {
-		char fl = 0;
-		for (int j = 0; j < len; ++j) {
-			if (operations[i][j] != name[j]) {
-				fl = 1;
-				break;
-			}
-		}
-		if (!fl) return 1;
+void clearExit(int of, int od, char *name) {
+	if (of) close(of);
+	if (od) close(od);
+	if (name) remove(name);
+	if (name) free(name);
+	if (operations) {
+		for (int i = 0; i < sizeOp; ++i) free(operations[i]);
+		free(operations);
 	}
-	return 0;
+	exit(1);
 }
 
 int main(int argc, char *argv[]) {
@@ -232,57 +247,45 @@ int main(int argc, char *argv[]) {
 
 	if (argc < 2) {
 		fprintf(stderr, "Error: No input files\n");
+		clearExit(0, 0, 0);
 		exit(1);
 	}
 	struct stat st;
 	if (stat(argv[1], &st) < 0) {
 		fprintf(stderr, "Error: Cannot open source file %s\n", argv[1]);
-		exit(1);
+		clearExit(0, 0, 0);
 	}
 	if (!S_ISREG(st.st_mode)) {
 		fprintf(stderr, "Error: source file %s is not regular\n", argv[1]);
-		exit(1);
+		clearExit(0, 0, 0);
 	}
 	int fd = open(argv[1], O_RDONLY);
 	if (fd < 0) {
 		fprintf(stderr, "Error: Cannot open source file %s\n", argv[1]);
-		exit(1);
+		clearExit(0, 0, 0);
 	}
 	char *buf = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (buf == MAP_FAILED) {
 		fprintf(stderr, "Error: Cannot create mmap on source file %s\n", argv[1]);
-		close(fd);
-		exit(0);
+		clearExit(fd, 0, 0);
 	}
 
 
 	char* outName = getName();
 	int od = open(outName, O_WRONLY | O_CREAT | O_TRUNC, 0700);
-	printf("%s\n", outName);
 	if (od < 0) {
 		fprintf(stderr, "Error: Cannot create temp fild\n");
-		close(fd);
 		free(outName);
-		exit(1);
+		clearExit(fd, 0, 0);
 	}
 	if (tryWrite(od, Cpreamb, strlen(Cpreamb))) {
 		fprintf(stderr, "Error: Error while writing\n");
-		close(fd);
-		close(od);
-		remove(outName);
-		free(outName);
-		exit(1);
+		clearExit(fd, od, outName);
 	}
 
 	if (addDefaultOps()) {
 		fprintf(stderr, "Error: Error while adding default operations\n");
-		close(fd);
-		close(od);
-		for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-		free(operations);
-		remove(outName);
-		free(outName);
-		exit(1);
+		clearExit(fd, od, outName);
 	}
 
 	int x;
@@ -291,45 +294,21 @@ int main(int argc, char *argv[]) {
 	char opend = 0;
 	for (int i = 0; i < st.st_size; ++i) {
 		int j = i;
+		char RE = 0;
 		while (j < st.st_size && isFunLetter(buf[j])) ++j;
 		if (j == st.st_size) {
-			fprintf(stderr, "Error: Bad operation on line %d: ", strNum);
-			while (i < j) {
-				fprintf(stderr, "%c", buf[i++]);
-			}
-			fprintf(stderr, "\n");
-			close(fd);
-			close(od);
-			for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-			free(operations);
-			remove(outName);
-			free(outName);
-			exit(1);
+			fprintf(stderr, "Error: Bad operation on line %d: %*s\n", strNum, j-i, buf+i);
+			clearExit(fd, od, outName);
 		}
-		char RE = 0;
 		if (buf[j] == ':') {
 			if (i == j) {
 				fprintf(stderr, "Error: empty function name on line %d\n", strNum);
-				close(fd);
-				close(od);
-				for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-				free(operations);
-				remove(outName);
-				exit(1);
+				clearExit(fd, od, outName);
 			}
 			if (existsFunction(buf + i, j - i)) {
-				fprintf(stderr, "Error: Compilation error on line %d\n function ", strNum);
-				while (i < j) {
-					fprintf(stderr, "%c", buf[i]);
-					++j;
-				}
-				fprintf(stderr, "created twice\n");
-				close(fd);
-				close(od);
-				for(int i = 0; i < sizeOp; ++i) free(operations[i]);
-				free(operations);
-				remove(outName);
-				exit(1);
+				fprintf(stderr, "Error: Compilation error on line %d\n function %*s"
+								" created twice\n", strNum, j - i, buf+i);
+				clearExit(fd, od, outName);
 			}
 			if (opend) {
 				char *top;
@@ -337,13 +316,7 @@ int main(int argc, char *argv[]) {
 				if (opend == 2) top = Cpost;
 				if (tryWrite(od, top, strlen(top))) {
 					fprintf(stderr, "Error: Error while writing\n");
-					close(fd);
-					close(od);
-					remove(outName);
-					free(outName);
-					for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-					free(operations);
-					exit(1);
+					clearExit(fd, od, outName);
 				}
 			}
 			if (j-i==4 && buf[i]=='m' && buf[i+1]=='a' && buf[i+2]=='i' && buf[i+3]=='n') {
@@ -356,62 +329,30 @@ int main(int argc, char *argv[]) {
 			if (opend == 2) top = Cmain;
 			if (tryWrite(od, top, strlen(top))) {
 				fprintf(stderr, "Error: Error while writing\n");
-				close(fd);
-				close(od);
-				remove(outName);
-				free(outName);
-				for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-				free(operations);
-				exit(1);
+				clearExit(fd, od, outName);
 			}
 			if (opend == 1) {
 				if (tryWrite(od, buf+i, j-i)) {
 					fprintf(stderr, "Error: Error while writing\n");
-					close(fd);
-					close(od);
-					remove(outName);
-					free(outName);
-					for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-					free(operations);
-					exit(1);
+					clearExit(fd, od, outName);
 				}
 				if (tryWrite(od, CFuncPrePost, strlen(CFuncPrePost))) {
 					fprintf(stderr, "Error: Error while writing\n");
-					close(fd);
-					close(od);
-					remove(outName);
-					free(outName);
-					for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-					free(operations);
-					exit(1);
+					clearExit(fd, od, outName);
 				}
 			}
 			if (addFunction(buf + i, j - i)) {
 				fprintf(stderr, "Error: cannot add function\n");
-				close(fd);
-				close(od);
-				remove(outName);
-				free(outName);
-				for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-				free(operations);
-				exit(1);
+				clearExit(fd, od, outName);
 			}
 			i = j;
 			continue;
 		}
 		if (buf[j] != '|') {
 			if (i != j) {
-				fprintf(stderr, "Error: Bad operation on line %d: ", strNum);
-				while (i < j) {
-					fprintf(stderr, "%c", buf[i++]);
-				}
-				fprintf(stderr, "\n");
-				close(fd);
-				close(od);
-				for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-				free(operations);
-				remove(outName);			
-				exit(1);
+				fprintf(stderr, "Error: Bad operation on line %d: %*s\n"
+								"maybe forget | after function name\n", strNum, j-i, buf+i);
+				clearExit(fd, od, outName);
 			}
 		} 
 		if (buf[j] == '\n') {
@@ -430,15 +371,15 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 		}
-		if(operation(buf + i, j - i + (buf[j] != '|'), od)) {
-			fprintf(stderr, "Error: Error while writing\n");
-			close(fd);
-			close(od);
-			for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-			free(operations);
-			remove(outName);
-			free(outName);
-			exit(1);
+		if((RE = operation(buf + i, j - i + (buf[j] != '|'), od))) {
+			if (RE == 1) {
+				fprintf(stderr, "Error: Error while writing\n");
+				clearExit(fd, od, outName);
+			} else if (RE == 2 && buf[j] == '|') {
+				fprintf(stderr, "Warning: using undeclared function on line %d: "
+								"%*s\n", strNum, j-i, buf + i);
+				RE = 0;
+			}
 		}
 		i = j;
 	}
@@ -449,13 +390,7 @@ int main(int argc, char *argv[]) {
 		if (opend == 2) top = Cpost;
 		if (tryWrite(od, top, strlen(top))) {
 			fprintf(stderr, "Error: Error while writing\n");
-			close(fd);
-			close(od);
-			remove(outName);
-			free(outName);
-			for (int i = 0; i < sizeOp; ++i) free(operations[i]);
-			free(operations);
-			exit(1);
+			clearExit(fd, od, outName);
 		}
 	}
 
@@ -489,3 +424,4 @@ int main(int argc, char *argv[]) {
 	free(outName);
 
 }
+
