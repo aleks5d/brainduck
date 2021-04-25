@@ -21,6 +21,8 @@ current version has a memory tape of size = 30'000
 
 stat position = 0
 
+Must exist function main in you code.
+
 ### comments
 
 you can use comment line 
@@ -84,6 +86,13 @@ end bracket
 ### subtasks
 
 ```
+name: code
+plus10: ++++++++++
+plus11: plus10|+
+```
+creating subtasks
+
+```
 n
 ```
 print '\n'
@@ -96,17 +105,17 @@ name|
 ## examples
 
 ```
-,.n|
+main:,.n|
 ```
 will read input char, write it and write '\n'
 
 ```
-+[.+]
+main:+[.+]
 ```
 will write all chars form 1 to 255
 
 ```
->,[>,]<[.<]n|
+main:>,[>,]<[.<]n|
 ```
 
 will read string until char(0) and print it reversed. 
@@ -119,5 +128,5 @@ if you use getchar with console input then it will read '\n' as well.
 
 - [ ] more examples
 - [ ] smth like registers 
-- [ ] functions 
+- [X] functions 
 - [ ] functions with parametres in Name, like: addX=add(X-1)|+
