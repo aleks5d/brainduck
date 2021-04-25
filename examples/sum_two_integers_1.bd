@@ -1,0 +1,59 @@
+// sum of same length integers. Leading zeros are possible.
+// input of every number must end with '\n'
+// possible input:
+// 1234
+// 2996
+plus10:
+	++++++++++
+minus10:
+	----------
+plus20:
+	plus10|plus10|
+minus20:
+	minus10|minus10|
+plus35:
+	plus20|plus10|+++++
+minus35:
+	minus20|minus10|-----
+plus48:
+	plus20|plus20|plus10|--
+minus48:
+	minus20|minus20|minus10|++
+readString:
+	,minus10|[plus10|>,minus10|]
+writeString:
+	[.>]
+main:
+	>>readString|
+	<[<]>
+	[
+		[-<+>]
+		,minus48|
+		[-<+>]
+		>
+	]
+	<<
+	[->>+<<]
+	<
+	[
+		>>plus10|plus48|-
+		[->-{<<+>>}<]
+		>plus10|plus48|-
+		<<minus10|minus48|++
+		{-<+>>>minus10|<<}
+		<
+		[->>+<<]
+		<
+	]
+	>>plus10|plus48|-
+	[->-{<<+>>}<]
+	>plus10|plus48|-
+	<<minus10|minus48|++
+	{-<+plus48|>>>minus10|<<}
+	<
+	[->>+<<]
+	>>
+	writeString|
+	>
+	writeString|
+	n|

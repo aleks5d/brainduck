@@ -1,3 +1,4 @@
+// "Copyright[2021] <aleks7dd@gmail.com>"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
@@ -286,13 +287,13 @@ int main(int argc, char *argv[]) {
 
 	int x;
 	int cnt = 0;
-	int cycles = 0;
+	int strNum = 1;
 	char opend = 0;
 	for (int i = 0; i < st.st_size; ++i) {
 		int j = i;
 		while (j < st.st_size && isFunLetter(buf[j])) ++j;
 		if (j == st.st_size) {
-			fprintf(stderr, "Error: Bad operation: ");
+			fprintf(stderr, "Error: Bad operation on line %d: ", strNum);
 			while (i < j) {
 				fprintf(stderr, "%c", buf[i++]);
 			}
@@ -308,7 +309,7 @@ int main(int argc, char *argv[]) {
 		char RE = 0;
 		if (buf[j] == ':') {
 			if (i == j) {
-				fprintf(stderr, "Error: empty function name\n");
+				fprintf(stderr, "Error: empty function name on line %d\n", strNum);
 				close(fd);
 				close(od);
 				for (int i = 0; i < sizeOp; ++i) free(operations[i]);
@@ -317,7 +318,7 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 			if (existsFunction(buf + i, j - i)) {
-				fprintf(stderr, "Error: Compilation error, function ");
+				fprintf(stderr, "Error: Compilation error on line %d\n function ", strNum);
 				while (i < j) {
 					fprintf(stderr, "%c", buf[i]);
 					++j;
@@ -400,7 +401,7 @@ int main(int argc, char *argv[]) {
 		}
 		if (buf[j] != '|') {
 			if (i != j) {
-				fprintf(stderr, "Error: Bad operation: ");
+				fprintf(stderr, "Error: Bad operation on line %d: ", strNum);
 				while (i < j) {
 					fprintf(stderr, "%c", buf[i++]);
 				}
@@ -413,6 +414,9 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 		} 
+		if (buf[j] == '\n') {
+			strNum++;
+		}
 		if (buf[j] == '/') {
 			if (buf[j + 1] == '/') {
 				while (j < st.st_size && buf[j] != '\n') ++j;
