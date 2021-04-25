@@ -72,6 +72,14 @@ if memory current position equal zero - go to the end bracket
 ]
 ```
 go to the start bracket
+```
+{
+```
+if memory current position equal zero - go to the end bracket 
+```
+}
+```
+end bracket
 
 ### subtasks
 

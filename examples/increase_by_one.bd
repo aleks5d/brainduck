@@ -1,0 +1,21 @@
+// read iteger, add 1 and print
+minus10:
+	----------
+plus10:
+	++++++++++
+minus48:
+	minus10|minus10|minus10|minus10|minus10|++
+plus48:
+	plus10|plus10|plus10|plus10|plus10|--
+readString:
+	,minus10|[plus10|>,minus10|]
+printString:
+	[.>]
+main:
+	>readString|<
+	+<
+	[+>minus48|minus10|{plus10|<->}plus48|<<]
+	plus48|+>minus48|minus10|{plus10|<-minus48|>}plus48|<
+	{<}>
+	printString|n|
+

@@ -185,6 +185,8 @@ int addDefaultOps() {
 	if(addOp2("-", "--mem[pos];\n")) return 1;
 	if(addOp2("[", "while(mem[pos]){\n")) return 1;
 	if(addOp2("]", "}\n")) return 1;
+	if(addOp2("{", "if(mem[pos]){\n")) return 1;
+	if(addOp2("}", "}\n")) return 1;
 	if(addOp2(",", "mem[pos]=getchar();\n")) return 1;
 	if(addOp2(".", "putchar(mem[pos]);\n")) return 1;
 	if(addOp2("n", "putchar(\'\\n\');\n")) return 1;
