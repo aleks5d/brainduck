@@ -51,6 +51,14 @@ char Compile[] =
 
 const int MAXBAD = 5;
 
+void printXsymbols(FILE* to, char* mem, int len) {
+	while (len) {
+		fprintf(to, "%c", *mem);
+		--len;
+		++mem;
+	}
+}
+
 char genChar() {
 	int x = rand() % (26 + 26 + 10);
 	if (x < 26) return x + 'a';
@@ -297,7 +305,9 @@ int main(int argc, char *argv[]) {
 		char RE = 0;
 		while (j < st.st_size && isFunLetter(buf[j])) ++j;
 		if (j == st.st_size) {
-			fprintf(stderr, "Error: Bad operation on line %d: %*s\n", strNum, j-i, buf+i);
+			fprintf(stderr, "Error: Bad operation on line %d: ", strNum);
+			printXsymbols(stderr, buf+i, j-i);
+			fprintf(stderr, "\n");
 			clearExit(fd, od, outName);
 		}
 		if (buf[j] == ':') {
@@ -306,8 +316,9 @@ int main(int argc, char *argv[]) {
 				clearExit(fd, od, outName);
 			}
 			if (existsFunction(buf + i, j - i)) {
-				fprintf(stderr, "Error: Compilation error on line %d\n function %*s"
-								" created twice\n", strNum, j - i, buf+i);
+				fprintf(stderr, "Error: Compilation error on line %d\n function ", strNum);
+				printXsymbols(stderr, buf+i, j-i);
+				fprintf(stderr, " created twice\n");
 				clearExit(fd, od, outName);
 			}
 			if (opend) {
@@ -350,8 +361,9 @@ int main(int argc, char *argv[]) {
 		}
 		if (buf[j] != '|') {
 			if (i != j) {
-				fprintf(stderr, "Error: Bad operation on line %d: %*s\n"
-								"maybe forget | after function name\n", strNum, j-i, buf+i);
+				fprintf(stderr, "Error: Bad operation on line %d: ", strNum);
+				printXsymbols(stderr, buf+i, j-i);
+				fprintf(stderr, "\nmaybe forget | after function name\n");
 				clearExit(fd, od, outName);
 			}
 		} 
@@ -376,8 +388,9 @@ int main(int argc, char *argv[]) {
 				fprintf(stderr, "Error: Error while writing\n");
 				clearExit(fd, od, outName);
 			} else if (RE == 2 && buf[j] == '|') {
-				fprintf(stderr, "Warning: using undeclared function on line %d: "
-								"%*s\n", strNum, j-i, buf + i);
+				fprintf(stderr, "Warning: using undeclared function on line %d: ", strNum);
+				printXsymbols(stderr, buf+i, j-i);
+				fprintf(stderr, "\n");
 				RE = 0;
 			}
 		}
