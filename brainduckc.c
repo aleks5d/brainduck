@@ -16,10 +16,14 @@
 char Cpreamb[] = 
 "#include<stdio.h>\n"
 "#include<stdlib.h>\n"
+"#include<string.h>\n"
 "unsigned char* mem;\n"
 "int pos = 0;\n"
-"int memSize = 30000;\n"
+"int memSize = %s;\n"
 "\n";
+
+/* default memSize */
+char DefualtMemSize[] = "30000";
 
 /* C main */
 char Cmain[] = 
@@ -28,7 +32,8 @@ char Cmain[] =
 "	if (mem == NULL) {\n"
 "		fprintf(stderr, \"Compilation error: Cannot create memory\\n\");\n"
 "		exit(1);\n"
-"	}\n";
+"	}\n"
+"   memset(mem, 0, memSize);\n";
 
 /* C post*/
 char Cpost[] = 
@@ -255,6 +260,7 @@ int main(int argc, char *argv[]) {
 
 	if (argc < 2) {
 		fprintf(stderr, "Error: No input files\n");
+		fprintf(stderr, "Usage: brainduckc sourcefile_path [-m memsize] [-o object]\n");
 		clearExit(0, 0, 0);
 		exit(1);
 	}
@@ -286,9 +292,26 @@ int main(int argc, char *argv[]) {
 		free(outName);
 		clearExit(fd, 0, 0);
 	}
-	if (tryWrite(od, Cpreamb, strlen(Cpreamb))) {
-		fprintf(stderr, "Error: Error while writing\n");
-		clearExit(fd, od, outName);
+	{
+		char *realPreamb;
+		int id = 0;
+		while (id < argc && strcmp(argv[id], "-m")) ++id;
+		if (id == argc) {
+			realPreamb = malloc(strlen(Cpreamb) + strlen(DefualtMemSize));
+			sprintf(realPreamb, Cpreamb, DefualtMemSize);
+		} else if (id == argc - 1) {
+			fprintf(stderr, "Error: Not given argument -m\n");
+		} else {
+			realPreamb = malloc(strlen(Cpreamb) + strlen(argv[id + 1]));
+			sprintf(realPreamb, Cpreamb, argv[id + 1]);
+		}
+		if (tryWrite(od, realPreamb, strlen(realPreamb))) {
+			free(realPreamb);
+			fprintf(stderr, "Error: Error while writing\n");
+			clearExit(fd, od, outName);
+		}
+		printf("%s\n", realPreamb);
+		free(realPreamb);
 	}
 
 	if (addDefaultOps()) {
@@ -423,7 +446,16 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}	
 	if (pid == 0) {
-		execlp(Compile, Compile, outName, NULL);
+		int id = 0;
+		while (id < argc && strcmp(argv[id], "-o")) id++;
+		if (id == argc) {
+			execlp(Compile, Compile, outName, NULL);
+		} else if (id == argc - 1) {
+			fprintf(stderr, "Error: not given argument -o\n");
+			exit(1);
+		} else {
+			execlp(Compile, Compile, outName, argv[id], argv[id + 1], NULL);
+		}
 		exit(1);
 	}
 	int res = 0;
