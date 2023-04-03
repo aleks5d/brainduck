@@ -12,6 +12,34 @@
 
 clear:
         [-]
+clearArgs:
+        >
+        // clear argc
+        clear|+>
+        clear|+>
+        clear|+>
+        clear|+>
+        // clear argv
+        +
+        [
+                >
+                {
+                        clear|+
+                }
+                -
+                {
+                        >
+                        {
+                                <+>
+                        }
+                        <
+                }
+                +
+        ]
+        <
+        [
+                -<
+        ]
 cmp2:                           // x y 0 0
         >+<                     
         [->->+<{>>-<<}<]        
@@ -56,6 +84,7 @@ swap:
         >movL|
         <<
 main:
+        clearArgs|
         >readString|>readString|<
         [      
                 <

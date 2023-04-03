@@ -1,4 +1,34 @@
 // read iteger, add 1 and print
+clear:
+	[-]
+clearArgs:
+	>
+	// clear argc
+	clear|+>
+	clear|+>
+	clear|+>
+	clear|+>
+	// clear argv
+	+
+	[
+		>
+		{
+			clear|+
+		}
+		-
+		{
+			>
+			{
+				<+>
+			}
+			<
+		}
+		+
+	]
+	<
+	[
+		-<
+	]
 minus10:
 	----------
 plus10:
@@ -12,6 +42,7 @@ readString:
 printString:
 	[.>]
 main:
+	clearArgs|
 	>readString|<
 	+<
 	[+>minus48|minus10|{plus10|<->}plus48|<<]

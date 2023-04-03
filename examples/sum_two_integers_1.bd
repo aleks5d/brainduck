@@ -3,6 +3,36 @@
 // possible input:
 // 1234
 // 2996
+clear:
+	[-]
+clearArgs:
+	>
+	// clear argc
+	clear|+>
+	clear|+>
+	clear|+>
+	clear|+>
+	// clear argv
+	+
+	[
+		>
+		{
+			clear|+
+		}
+		-
+		{
+			>
+			{
+				<+>
+			}
+			<
+		}
+		+
+	]
+	<
+	[
+		-<
+	]
 plus10:
 	++++++++++
 minus10:
@@ -24,6 +54,7 @@ readString:
 writeString:
 	[.>]
 main:
+	clearArgs|
 	>>readString|
 	<[<]>
 	[

@@ -1,6 +1,37 @@
 //this script will read string until '\n', reverse it and write
 // ' - curr position
+clear:
+    [-]
+clearArgs:
+    >
+    // clear argc
+    clear|+>
+    clear|+>
+    clear|+>
+    clear|+>
+    // clear argv
+    +
+    [
+        >
+        {
+            clear|+
+        }
+        -
+        {
+            >
+            {
+                <+>
+            }
+            <
+        }
+        +
+    ]
+    <
+    [
+        -<
+    ]
 main:
+clearArgs|
 >>++++++++++< 		//0 0 \n' 0 ...
 ,>[->+<<->]< 		// read char x. 0 (x-\n)' 0 \n
 [> 			// if x != \n then read again. 0 (x-\n) 0' \n
