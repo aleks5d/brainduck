@@ -1,0 +1,3 @@
+#include ./examples/lib.bd
+main:
+    printHello|

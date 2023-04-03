@@ -1,3 +1,2 @@
 main:
-    C{printf("%s\n", "hello from C inline code!");}
-    
+    C{printf("%s\n", "hello from C inline code!");}    

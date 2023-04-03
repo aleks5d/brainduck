@@ -1,0 +1,2 @@
+printHello:
+    C{printf("Hello from lib!\n");}
