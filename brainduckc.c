@@ -389,6 +389,26 @@ int main(int argc, char *argv[]) {
             continue;
         }
         if (buf[j] != '|') {
+			if (i + 1 == j && buf[i] == 'C' && buf[j] == '{') {
+				int bal = 1;
+				j++;
+				while (bal > 0 && j < st.st_size) {
+					if (buf[j] == '{') ++bal;
+					else if (buf[j] == '}') --bal;
+					else if (buf[j] == '\n') ++strNum;
+					++j;
+				}
+				if (bal > 0 && j == st.st_size) {
+					fprintf(stderr, "Error: Bad bracket sequence for inline C code\n");
+					clearExit(fd, od, outName);
+				}
+				if(tryWrite(od, buf + i + 1, j - i - 1)) {
+					fprintf(stderr, "Error: Error while writing\n");
+					clearExit(fd, od, outName);
+				}
+				i = j;
+				continue;
+			}
             if (i != j) {
                 fprintf(stderr, "Error: Bad operation on line %d: ", strNum);
                 printXsymbols(stderr, buf+i, j-i);
