@@ -2,131 +2,108 @@
  
 <b>brainduck</b> is an esoteric programming language based on Brainfuck. 
 
-## compilation
+## Compilation
 
-you sould compile brainduckc.c and use it like compiler 
+You sould compile ``brainduckc.c`` and use it like compiler 
 
 ```shell
 gcc brainduckc.c -o brainduckc
-./brainduckc main.bd
+./brainduckc main.bd [-o OutputPath] [-m MemSize]
 ```
 
-Current version compile file to a.out
+By default compile to ``a.out``. Can be configured by ``-o OutputPath``
 
-## syntax
+## Syntax
 
-### initial position
+### Initial position
 
-current version has a memory tape of size = 30'000
+By default ``MemSize = 30'000``. Can be configured by ``-m MemSize``
 
-stat position = 0
+Start ``position = 0``
 
-Must exist function main in you code.
+There must be a ``main`` function in your code.
 
-### comments
+### Comments
 
-you can use comment line 
+You can use comment line:
 ```
 //some comment
 ```
-or comment block
+Or comment block:
 ```
 /* line 0
    line 1
    line 2 */
 ```
 
-#### operations
+#### Operations
 
-```
->
-```
-increase position
-```
-<
-```
-decrease position
-```
-+
-```
-increase memory current position
-```
--
-```
-decrease memory current position
-```
-,
-```
-read char and put it to memory current position
+``>`` - Increase position
 
-this operation is equal to getchar() in C.
-```
-.
-```
-write char from memory current position
+``<`` - Decrease position
 
-this operation is equal to putchar() in C.
-```
-[
-```
-if memory current position equal zero - go to the end bracket 
-```
-]
-```
-go to the start bracket
-```
-{
-```
-if memory current position equal zero - go to the end bracket 
-```
-}
-```
-end bracket
+``+`` - Increase memory current position
 
-### subtasks
+``-`` - Decrease memory current position
 
+``,`` - Read char and put it to memory current position. If EOF - return 0. 
+
+This operation is equal to ``int _ = getchar(); mem[pos] = (_ == -1 ? 0 : _)`` in C.
+
+``.`` - Write char from memory current position. This operation is equal to ``putchar(mem[pos])`` in C.
+
+``[`` - If memory current position equal zero - go to the end bracket.
+
+``]`` - Go to the start bracket.
+
+``{`` - If memory current position equal zero - go to the end bracket.
+
+``}`` - End bracket.
+
+### Subtasks
+
+You can create subtasks using syntax:
 ```
 name: code
+```
+For example:
+```
 plus10: ++++++++++
 plus11: plus10|+
 ```
-creating subtasks
 
-```
-n
-```
-print '\n'
+#### Default Subtasks
 
-syntax of subtasks calling:
+``n`` - Print EOL. Equal ``putchar('\n')`` in C.
+
+``feof`` - Check EOF in stdin. Equel ``mem[pos] = feof(stdin)`` in C. 
+
+#### Subtasks execution
+
+You can call subtasks using syntax:
 ```
 name|
 ```
 
 ## examples
 
+Read char, write it and write EOL:
 ```
 main:,.n|
 ```
-will read input char, write it and write '\n'
 
+Write all chars from 1 to 255:
 ```
 main:+[.+]
 ```
-will write all chars form 1 to 255
 
+Read string until ``\0``, print it reversed and print EOL:
 ```
 main:>,[>,]<[.<]n|
 ```
 
-will read string until char(0) and print it reversed. 
+## Notes
 
-## notes
+Getchar will read every char.
 
-if you use getchar with console input then it will read '\n' as well.
-
-## ToDo
-
-- [ ] more examples
-- [ ] smth like registers 
-- [X] functions 
-- [ ] functions with parametres in Name, like: addX=add(X-1)|+
+If you needn't command line arguments, you can clear them by [``clearArgs``](https://github.com/aleks5d/brainduck/blob/main/examples/clear_args.bd) function.
