@@ -1,0 +1,33 @@
+clear:
+    [-]
+clearArgs:
+    >
+    // clear argc
+    clear|+>
+    clear|+>
+    clear|+>
+    clear|+>
+    // clear argv
+    +
+    [
+        >
+        {
+            clear|+
+        }
+        -
+        {
+            >
+            {
+                <+>
+            }
+            <
+        }
+        +
+    ]
+    <
+    [
+        -<
+    ]
+main:
+    clearArgs|
+    
