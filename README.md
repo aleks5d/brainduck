@@ -85,6 +85,13 @@ You can call subtasks using syntax:
 name|
 ```
 
+### C inlining
+
+You can inline C code using syntax:
+```
+C{C code}
+```
+
 ## examples
 
 Read char, write it and write EOL:
@@ -100,6 +107,11 @@ main:+[.+]
 Read string until ``\0``, print it reversed and print EOL:
 ```
 main:>,[>,]<[.<]n|
+```
+
+Print string using C inline code:
+```
+main: C{printf("%s\n", "hello from C inline code!");} 
 ```
 
 ## Notes
