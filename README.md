@@ -104,6 +104,6 @@ main:>,[>,]<[.<]n|
 
 ## Notes
 
-Getchar will read every char.
+``,`` will read every char.
 
 If you needn't command line arguments, you can clear them by [``clearArgs``](https://github.com/aleks5d/brainduck/blob/main/examples/clear_args.bd) function.
