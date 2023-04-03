@@ -92,6 +92,15 @@ You can inline C code using syntax:
 C{C code}
 ```
 
+### Including
+
+You can include other brainduck file using syntax:
+```
+#include filename
+```
+
+Now all paths are relative from compiler. Will be change to relative from current file soon.
+
 ## examples
 
 Read char, write it and write EOL:
